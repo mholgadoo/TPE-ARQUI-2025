@@ -86,7 +86,7 @@ int main()
 {	
 	load_idt();
 
-	int a = 1 / 0;  // Forzamos la excepción
+	// int a = 1 / 0;  // Forzamos la excepción
 
 	ncPrint("[Kernel Main]");
 	ncNewline();

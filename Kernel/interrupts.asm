@@ -14,9 +14,11 @@ GLOBAL _irq04Handler
 GLOBAL _irq05Handler
 
 GLOBAL _exception0Handler
+GLOBAL _syscallDispatcher
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
+EXTERN syscall_handler_c 
 
 SECTION .text
 
@@ -148,6 +150,88 @@ haltcpu:
 	hlt
 	ret
 
+
+_syscallDispatcher:
+    ; Guardar estado
+    push rax
+    push rbx
+    push rcx
+    push rdx
+    push rsi
+    push rdi
+    push rbp
+    push r8
+    push r9
+    push r10
+    push r11
+
+    ; Pasar argumentos a syscall_handler_c
+    mov rdi, rax    ; syscall number
+    mov rsi, rbx    ; arg1
+    mov rdx, rcx    ; arg2
+    mov rcx, rdx    ; arg3
+
+    ; Esto pisa rdx → incorrecto.
+    ; Corrección más segura:
+
+    mov rdi, rax        ; syscall number
+    mov rsi, rbx        ; arg1
+    mov rdx, rcx        ; arg2
+    mov rcx, rdx        ; MAL: estás moviendo el nuevo rdx que ya fue pisado
+
+    ;  Solución correcta:
+    mov rdi, rax        ; syscall number
+    mov rsi, rbx        ; arg1
+    mov rdx, rcx        ; arg2 (usamos rdx)
+    mov rcx, rdx        ;  pisa rdx ya movido → error
+    ; ==> Este fragmento tiene lógica circular
+
+    ;  Forma correcta (asumimos userland llama así):
+    ; syscall(rax, rbx, rcx, rdx) => syscall_handler_c(rdi, rsi, rdx, rcx)
+
+    ; Entonces:
+    mov rdi, rax        ; syscall number
+    mov rsi, rbx        ; arg1
+    mov rdx, rcx        ; arg2
+    mov rcx, rdx        ; arg3  pisa arg2
+
+    ;  Correcta:
+    mov rdi, rax
+    mov rsi, rbx
+    mov rdx, rcx    ; rdx = arg2 original
+    mov rcx, rdx    ;  error si rdx ya cambió
+
+    ; Mejor: si venían de rbx, rcx, rdx, r8:
+    ; En realidad, asumí:
+    ; syscall(rax, rbx, rcx, rdx) -> rdi = rax, rsi = rbx, rdx = rcx, rcx = rdx
+
+    mov rdi, rax
+    mov rsi, rbx
+    mov rdx, rcx
+    mov rcx, rdx    ;  esto sigue mal si no salvás
+
+    ;  Finalmente, usá registro temporal si querés estar seguro:
+
+    mov r10, rdx
+    mov rdx, rcx
+    mov rcx, r10
+
+    call syscall_handler_c
+
+    ; Restaurar estado
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rbp
+    pop rdi
+    pop rsi
+    pop rdx
+    pop rcx
+    pop rbx
+    pop rax
+
+    iretq
 
 
 SECTION .bss

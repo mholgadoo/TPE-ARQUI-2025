@@ -16,16 +16,17 @@ typedef struct {
 
 #pragma pack(pop)		/* Reestablece la alinceación actual */
 
-
+extern void _syscallDispatcher();
 
 DESCR_INT * idt = (DESCR_INT *) 0;	// IDT de 255 entradas
 
-static void setup_IDT_entry (int index, uint64_t offset);
+static void setup_IDT_entry (int index, uint64_t offset, uint8_t access);
 
 void load_idt() {
 
-  setup_IDT_entry (0x20, (uint64_t)&_irq00Handler);
-  setup_IDT_entry (0x00, (uint64_t)&_exception0Handler);
+  setup_IDT_entry (0x20, (uint64_t)&_irq00Handler, ACS_INT);
+  setup_IDT_entry (0x00, (uint64_t)&_exception0Handler, ACS_INT);
+  setup_IDT_entry(0x80, (uint64_t)&_syscallDispatcher, ACS_SYSCALL);
 
 
 	//Solo interrupcion timer tick habilitadas
@@ -35,12 +36,12 @@ void load_idt() {
 	_sti();
 }
 
-static void setup_IDT_entry (int index, uint64_t offset) {
+static void setup_IDT_entry (int index, uint64_t offset, uint8_t access) {
   idt[index].selector = 0x08;
   idt[index].offset_l = offset & 0xFFFF;
   idt[index].offset_m = (offset >> 16) & 0xFFFF;
   idt[index].offset_h = (offset >> 32) & 0xFFFFFFFF;
-  idt[index].access = ACS_INT;
+  idt[index].access = access;
   idt[index].cero = 0;
   idt[index].other_cero = (uint64_t) 0;
 }

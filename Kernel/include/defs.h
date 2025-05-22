@@ -15,6 +15,7 @@
 #define ACS_IDT         ACS_DSEG
 #define ACS_INT_386 	0x0E		/* Interrupt GATE 32 bits */
 #define ACS_INT         ( ACS_PRESENT | ACS_INT_386 )
+#define ACS_SYSCALL     ( ACS_INT | 0x60 )  // 0x8E | 0x60 = 0xEE
 
 
 #define ACS_CODE        (ACS_PRESENT | ACS_CSEG | ACS_READ)
