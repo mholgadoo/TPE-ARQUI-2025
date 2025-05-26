@@ -1,22 +1,24 @@
+.PHONY: all bootloader kernel userland image run clean
 
-all:  bootloader kernel userland image
+all: bootloader kernel userland image
 
 bootloader:
-	cd Bootloader; make all
+	cd Bootloader && make all
 
 kernel:
-	cd Kernel; make all
+	cd Kernel && make all
 
 userland:
-	cd Userland; make all
+	cd Userland && make all
 
-image: kernel bootloader userland
-	cd Image; make all
+image:
+	cd Image && make all
+
+run:
+	@echo "Ya podés ejecutar './run.sh' en otra terminal fuera del contenedor."
 
 clean:
-	cd Bootloader; make clean
-	cd Image; make clean
-	cd Kernel; make clean
-	cd Userland; make clean
-
-.PHONY: bootloader image collections kernel userland all clean
+	cd Bootloader && make clean
+	cd Kernel && make clean
+	cd Userland && make clean
+	cd Image && make clean
