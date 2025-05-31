@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h> // para size_t
 
-// syscalls obligatorias TP5/TPE
+// syscalls obligatorias
 void sys_write(uint64_t fd, const char *buffer, uint64_t length);
 void sys_clear_screen(void);
 void sys_set_font_size(size_t size);

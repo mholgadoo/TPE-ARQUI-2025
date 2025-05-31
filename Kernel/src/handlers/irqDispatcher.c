@@ -1,17 +1,23 @@
-#include <time.h>
+// src/handlers/irqDispatcher.c
+
 #include <stdint.h>
+#include "time.h"     // Tu header con timer_handler()
 
-static void int_20();
-
+// Dispatcher genérico de IRQs
 void irqDispatcher(uint64_t irq) {
-	switch (irq) {
-		case 0:
-			int_20();
-			break;
-	}
-	return;
+    switch (irq) {
+        case 0:
+            // Llamamos al handler de timer
+            int_20();
+            break;
+
+        default:
+            // IRQ no contemplada
+            break;
+    }
 }
 
 void int_20() {
-	timer_handler();
+    ncPrint("TIMERTICK");
+    timer_handler();
 }

@@ -1,10 +1,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <lib.h>
-#include <moduleLoader.h>
-#include <naiveConsole.h>
-#include <idtLoader.h>
-
+#include "moduleLoader.h"
+#include "naiveConsole.h"
+#include "idtLoader.h"    // IDT: vectores 0x00,06,20,21,80
+#include "pic.h"            // remapPIC(), picMasterMask(), picSlaveMask()
+#include "time.h"           // initPIT(), setTickFrequency(), timer_handler()
+#include "interrupts.h"    // Stub de irqDispatcher, exceptionDispatcher
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -40,14 +42,14 @@ void * initializeKernelBinary()
 	char buffer[10];
 
 	ncPrint("[x64BareBones]");
-	ncPrintNewline();
+	ncNewline();
 
 	ncPrint("CPU Vendor:");
 	ncPrint(cpuVendor(buffer));
-	ncPrintNewline();
+	ncNewline();
 
 	ncPrint("[Loading modules]");
-	ncPrintNewline();
+	ncNewline();
 	void * moduleAddresses[] = {
 		sampleCodeModuleAddress,
 		sampleDataModuleAddress
@@ -55,58 +57,62 @@ void * initializeKernelBinary()
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
 	ncPrint("[Done]");
-	ncPrintNewline();
-	ncPrintNewline();
+	ncNewline();
+	ncNewline();
 
 	ncPrint("[Initializing kernel's binary]");
-	ncPrintNewline();
+	ncNewline();
 
 	clearBSS(&bss, &endOfKernel - &bss);
 
 	ncPrint("  text: 0x");
 	ncPrintHex((uint64_t)&text);
-	ncPrintNewline();
+	ncNewline();
 	ncPrint("  rodata: 0x");
 	ncPrintHex((uint64_t)&rodata);
-	ncPrintNewline();
+	ncNewline();
 	ncPrint("  data: 0x");
 	ncPrintHex((uint64_t)&data);
-	ncPrintNewline();
+	ncNewline();
 	ncPrint("  bss: 0x");
 	ncPrintHex((uint64_t)&bss);
-	ncPrintNewline();
+	ncNewline();
 
 	ncPrint("[Done]");
-	ncPrintNewline();
-	ncPrintNewline();
+	ncNewline();
+	ncNewline();
 	return getStackBase();
 }
 
 int main()
 {	
-	load_idt();
-
-	// int a = 1 / 0;  // Forzamos la excepción
+    // ——— Inicialización del subsistema de interrupciones ———
+    load_idt();           // 1) Monta la IDT con vectores 0x00/#DE,0x06/#UD,0x20/IRQ0,0x21/IRQ1,0x80/syscall
+    remapPIC();           // 2) Remapea PIC1→0x20, PIC2→0x28 (ICW1–4)
+    setTickFrequency(100);// 3) Inicializa el PIT a 100 Hz y actualiza tickFrequency
+    picMasterMask(0xFC);  // 4) Habilita IRQ0 (bit0=0) e IRQ1 (bit1=0) en PIC maestro
+    picSlaveMask(0xFF);   // 5) Enmascara todas las líneas en PIC esclavo
+    __asm__ volatile("sti"); // 6) Activa interrupciones en el CPU
 
 	ncPrint("[Kernel Main]");
-	ncPrintNewline();
+	ncNewline();
 	ncPrint("  Sample code module at 0x");
 	ncPrintHex((uint64_t)sampleCodeModuleAddress);
-	ncPrintNewline();
+	ncNewline();
 	ncPrint("  Calling the sample code module returned: ");
 	ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
-	ncPrintNewline();
-	ncPrintNewline();
+	ncNewline();
+	ncNewline();
 
 	ncPrint("  Sample data module at 0x");
 	ncPrintHex((uint64_t)sampleDataModuleAddress);
-	ncPrintNewline();
+	ncNewline();
 	ncPrint("  Sample data module contents: ");
 	ncPrint((char*)sampleDataModuleAddress);
-	ncPrintNewline();
+	ncNewline();
+	
+	while(1);
 
 	ncPrint("[Finished]");
-
-	while (1);
 	return 0;
 }

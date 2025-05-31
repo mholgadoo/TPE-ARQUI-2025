@@ -4,7 +4,7 @@
 
 uint64_t syscall_handler_c(uint64_t num, uint64_t a1, uint64_t a2, uint64_t a3) {
     switch (num) {
-        case 1:  sys_write(a1, (const char*)a2, a3);             break;
+        case 1:  sys_write(a1, (const char*)a2, a3);            break;
         case 2:  sys_clear_screen();                            break;
         case 3:  /* opcional print_dec, no syscall */           break;
         case 4:  /* opcional print_hex, no syscall */           break;

@@ -49,7 +49,11 @@ int sys_is_key_pressed(void) {
 
 // 8) get_time
 void sys_get_time(int *h, int *m, int *s) {
-    getTime(h, m, s);
+    Timestamp ts;
+    getTime(&ts);
+    if (h) *h = ts.hours;
+    if (m) *m = ts.minutes;
+    if (s) *s = ts.seconds;
 }
 
 // 11) get_registers_snapshot

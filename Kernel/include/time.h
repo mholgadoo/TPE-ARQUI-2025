@@ -3,14 +3,24 @@
 
 #include <stdint.h>
 
-// Manejador de interrupción del temporizador
+/// Inicializa el PIT a freq_hz tics por segundo
+void initPIT(uint32_t freq_hz);
+
+/// Handler de IRQ0 (timer tick); debe ser llamado desde irqDispatcher
 void timer_handler(void);
 
-// Ticks y segundos transcurridos desde el arranque
-int  ticks_elapsed(void);
-int  seconds_elapsed(void);
+/// Ajusta la frecuencia lógica de segundos
+void setTickFrequency(uint16_t hz);
 
-// Hora actual: rellena h, m y s
-void getTime(int *h, int *m, int *s);
+/// (Opcional) Sleep bloqueante en tics
+void sleep(uint32_t ticksToWait);
+
+/// Estructura para hora real
+typedef struct {
+    int hours, minutes, seconds, day, month, year;
+} Timestamp;
+
+/// Lee el reloj CMOS y rellena @ts
+void getTime(Timestamp *ts);
 
 #endif // TIME_H
