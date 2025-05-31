@@ -40,14 +40,14 @@ void * initializeKernelBinary()
 	char buffer[10];
 
 	ncPrint("[x64BareBones]");
-	ncNewline();
+	ncPrintNewline();
 
 	ncPrint("CPU Vendor:");
 	ncPrint(cpuVendor(buffer));
-	ncNewline();
+	ncPrintNewline();
 
 	ncPrint("[Loading modules]");
-	ncNewline();
+	ncPrintNewline();
 	void * moduleAddresses[] = {
 		sampleCodeModuleAddress,
 		sampleDataModuleAddress
@@ -55,30 +55,30 @@ void * initializeKernelBinary()
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
 	ncPrint("[Done]");
-	ncNewline();
-	ncNewline();
+	ncPrintNewline();
+	ncPrintNewline();
 
 	ncPrint("[Initializing kernel's binary]");
-	ncNewline();
+	ncPrintNewline();
 
 	clearBSS(&bss, &endOfKernel - &bss);
 
 	ncPrint("  text: 0x");
 	ncPrintHex((uint64_t)&text);
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  rodata: 0x");
 	ncPrintHex((uint64_t)&rodata);
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  data: 0x");
 	ncPrintHex((uint64_t)&data);
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  bss: 0x");
 	ncPrintHex((uint64_t)&bss);
-	ncNewline();
+	ncPrintNewline();
 
 	ncPrint("[Done]");
-	ncNewline();
-	ncNewline();
+	ncPrintNewline();
+	ncPrintNewline();
 	return getStackBase();
 }
 
@@ -89,21 +89,21 @@ int main()
 	// int a = 1 / 0;  // Forzamos la excepción
 
 	ncPrint("[Kernel Main]");
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  Sample code module at 0x");
 	ncPrintHex((uint64_t)sampleCodeModuleAddress);
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  Calling the sample code module returned: ");
 	ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
-	ncNewline();
-	ncNewline();
+	ncPrintNewline();
+	ncPrintNewline();
 
 	ncPrint("  Sample data module at 0x");
 	ncPrintHex((uint64_t)sampleDataModuleAddress);
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  Sample data module contents: ");
 	ncPrint((char*)sampleDataModuleAddress);
-	ncNewline();
+	ncPrintNewline();
 
 	ncPrint("[Finished]");
 

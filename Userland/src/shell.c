@@ -1,9 +1,11 @@
 // sampleCodeModule.c
+#include "user_syscalls.h"
 #include <stdint.h>
-#include "syscall.h"
+#include <stddef.h>
+// …
 
 int main() {
     char *msg = "Hola desde syscall!\n";
-    syscall(1, (uint64_t)msg, 21, 0);
+    write(1, msg, 21);
     return 0;
 }

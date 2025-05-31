@@ -1,38 +1,36 @@
 include Makefile.inc
 
-KERNEL=kernel.bin
-SOURCES=kernel.c lib.c moduleLoader.c naiveConsole.c idtLoader.c irqDispatcher.c exceptions.c time.c syscall.c
-SOURCES_ASM=asm/libasm.asm interrupts.asm
-OBJECTS=$(SOURCES:.c=.o)
-OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
-LOADERSRC=loader.asm
+# Nombre del binario final
+KERNEL := kernel.bin
 
-LOADEROBJECT=$(LOADERSRC:.asm=.o)
-STATICLIBS=
+# Linker script
+LDSCRIPT := kernel.ld
 
+# Todos los .asm en asm/
+ASM_SRCS := $(wildcard asm/*.asm)
+ASM_OBJS := $(ASM_SRCS:.asm=.o)
+
+# Todos los .c en src/ y subdirectorios
+C_SRCS  := $(shell find src -name '*.c')
+C_OBJS  := $(C_SRCS:.c=.o)
+
+# Regla por defecto
 all: $(KERNEL)
 
-$(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
-	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+# Cómo enlazar kernel.bin
+$(KERNEL): $(ASM_OBJS) $(C_OBJS)
+	$(LD) $(LDFLAGS) -T $(LDSCRIPT) -o $@ $(ASM_OBJS) $(C_OBJS)
 
-# Regla genérica
+# Compilar cualquier .c
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
+	$(GCC) $(GCCFLAGS) -Iinclude -c $< -o $@
 
-# Regla explícita para syscall.c
-syscall.o: syscall.c
-	$(GCC) $(GCCFLAGS) -I./include -c syscall.c -o syscall.o
+# Ensamblar cualquier .asm
+%.o: %.asm
+	$(ASM) $(ASMFLAGS) -f elf64 $< -o $@
 
-%.o : %.asm
-	$(ASM) $(ASMFLAGS) $< -o $@
-
-$(LOADEROBJECT):
-	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
-
+# Limpiar artefactos
 clean:
-	rm -rf asm/*.o *.o *.bin
+	rm -f $(ASM_OBJS) $(C_OBJS) $(KERNEL)
 
 .PHONY: all clean
-#./Toolchain/ModulePacker/mp.bin Kernel/kernel.bin Userland/0000-sampleCodeModule.bin Userland/0001-sampleDataModule.bin -o Image/x64BareBonesImage.img
-#	qemu-img convert -O qcow2 Image/x64BareBonesImage.img Image/x64BareBonesImage.qcow2
-#	./run.sh

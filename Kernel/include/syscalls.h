@@ -1,11 +1,21 @@
-#ifndef _SYSCALLS_H_
-#define _SYSCALLS_H_
+#ifndef SYSCALLS_H
+#define SYSCALLS_H
 
-#include <stdint.h>  // para uint64_t y size_t
+#include <stdint.h>
+#include <stddef.h> // para size_t
 
+// syscalls obligatorias TP5/TPE
+void sys_write(uint64_t fd, const char *buffer, uint64_t length);
+void sys_clear_screen(void);
 void sys_set_font_size(size_t size);
-size_t sys_get_font_size();
-void sys_get_time(uint64_t *h, uint64_t *m, uint64_t *s);
-void sys_get_registers_snapshot(uint64_t *buffer);
+char sys_get_char(void);
+int  sys_is_key_pressed(void);
+void sys_get_time(int *hours, int *minutes, int *seconds);
+void sys_get_registers_snapshot(uint64_t *regs);
+void sys_beep(void);
+// excepciones de prueba
+// (disparadas directamente desde syscall handler)
+void sys_trigger_div_zero(void);
+void sys_trigger_invalid_opcode(void);
 
-#endif
+#endif // SYSCALLS_H
