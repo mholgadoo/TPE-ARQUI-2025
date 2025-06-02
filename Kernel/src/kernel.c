@@ -42,14 +42,14 @@ void * initializeKernelBinary()
 	char buffer[10];
 
 	ncPrint("[x64BareBones]");
-	ncNewline();
+	ncPrintNewline();
 
 	ncPrint("CPU Vendor:");
 	ncPrint(cpuVendor(buffer));
-	ncNewline();
+	ncPrintNewline();
 
 	ncPrint("[Loading modules]");
-	ncNewline();
+	ncPrintNewline();
 	void * moduleAddresses[] = {
 		sampleCodeModuleAddress,
 		sampleDataModuleAddress
@@ -57,35 +57,38 @@ void * initializeKernelBinary()
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
 	ncPrint("[Done]");
-	ncNewline();
-	ncNewline();
+	ncPrintNewline();
+	ncPrintNewline();
 
 	ncPrint("[Initializing kernel's binary]");
-	ncNewline();
+	ncPrintNewline();
 
 	clearBSS(&bss, &endOfKernel - &bss);
 
 	ncPrint("  text: 0x");
 	ncPrintHex((uint64_t)&text);
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  rodata: 0x");
 	ncPrintHex((uint64_t)&rodata);
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  data: 0x");
 	ncPrintHex((uint64_t)&data);
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  bss: 0x");
 	ncPrintHex((uint64_t)&bss);
-	ncNewline();
+	ncPrintNewline();
 
 	ncPrint("[Done]");
-	ncNewline();
-	ncNewline();
+	ncPrintNewline();
+	ncPrintNewline();
 	return getStackBase();
 }
 
 int main()
 {	
+	ncClear();
+    ncPrint("DEBUG: entro a main()\n");
+    ncPrint("> ");
     // ——— Inicialización del subsistema de interrupciones ———
     load_idt();           // 1) Monta la IDT con vectores 0x00/#DE,0x06/#UD,0x20/IRQ0,0x21/IRQ1,0x80/syscall
     remapPIC();           // 2) Remapea PIC1→0x20, PIC2→0x28 (ICW1–4)
@@ -95,21 +98,21 @@ int main()
     __asm__ volatile("sti"); // 6) Activa interrupciones en el CPU
 
 	ncPrint("[Kernel Main]");
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  Sample code module at 0x");
 	ncPrintHex((uint64_t)sampleCodeModuleAddress);
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  Calling the sample code module returned: ");
 	ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
-	ncNewline();
-	ncNewline();
+	ncPrintNewline();
+	ncPrintNewline();
 
 	ncPrint("  Sample data module at 0x");
 	ncPrintHex((uint64_t)sampleDataModuleAddress);
-	ncNewline();
+	ncPrintNewline();
 	ncPrint("  Sample data module contents: ");
 	ncPrint((char*)sampleDataModuleAddress);
-	ncNewline();
+	ncPrintNewline();
 	
 	while(1);
 

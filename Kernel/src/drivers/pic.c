@@ -26,11 +26,3 @@ void remapPIC(void) {
     outb(PIC1_DATA, 0xFF);
     outb(PIC2_DATA, 0xFF);
 }
-
-void picMasterMask(uint8_t mask) {
-    outb(PIC1_DATA, mask);
-}
-
-void picSlaveMask(uint8_t mask) {
-    outb(PIC2_DATA, mask);
-}

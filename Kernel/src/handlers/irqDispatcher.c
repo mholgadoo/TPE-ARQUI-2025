@@ -1,7 +1,11 @@
-// src/handlers/irqDispatcher.c
-
 #include <stdint.h>
 #include "time.h"     // Tu header con timer_handler()
+#include "naiveConsole.h"
+
+void int_20() {
+    ncPrint("TIMERTICK");
+    timer_handler();
+}
 
 // Dispatcher genérico de IRQs
 void irqDispatcher(uint64_t irq) {
@@ -15,9 +19,4 @@ void irqDispatcher(uint64_t irq) {
             // IRQ no contemplada
             break;
     }
-}
-
-void int_20() {
-    ncPrint("TIMERTICK");
-    timer_handler();
 }

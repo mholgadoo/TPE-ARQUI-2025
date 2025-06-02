@@ -1,6 +1,6 @@
-#include "user_syscalls.h"
 #include <stddef.h>
 #include <stdint.h>
+#include "lib.h"
 
 uint64_t syscall(uint64_t syscallNumber, uint64_t arg1, uint64_t arg2, uint64_t arg3) {
     uint64_t ret;
